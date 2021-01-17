@@ -38,22 +38,22 @@ namespace zb.FaceDetect
             int result_num
             );
 
-        [DllImport("DarkPredictor.dll")]
+        [DllImport("DarkPredictor.dll", CallingConvention=CallingConvention.Cdecl)]
         private extern static IntPtr create_predictor();
 
-        [DllImport("DarkPredictor.dll")]
+        [DllImport("DarkPredictor.dll", CallingConvention=CallingConvention.Cdecl)]
         private extern static void set_log(IntPtr predictor, string log_file);
 
-        [DllImport("DarkPredictor.dll")]
+        [DllImport("DarkPredictor.dll", CallingConvention = CallingConvention.Cdecl)]
         private extern static void load(IntPtr predictor, string config_file, string weights_file);
 
-        [DllImport("DarkPredictor.dll")]
+        [DllImport("DarkPredictor.dll", CallingConvention = CallingConvention.Cdecl)]
         private extern static void destroy_predictor(IntPtr predictor);
 
-        [DllImport("DarkPredictor.dll")]
+        [DllImport("DarkPredictor.dll", CallingConvention = CallingConvention.Cdecl)]
         private extern static void predict_image_file(IntPtr predictor, string image_file, predict_result_handler handler);
 
-        [DllImport("DarkPredictor.dll")]
+        [DllImport("DarkPredictor.dll", CallingConvention = CallingConvention.Cdecl)]
         private extern static void predict_image(
             IntPtr predictor, 
             byte[] image_data,
