@@ -80,21 +80,19 @@ class DarkPredictor:
         self.c_load(self.predictor, cast(
             cs, c_char_p), cast(wt, c_char_p))
 
-    def predict_file(self, image_file):
-        img = image_file.encode('utf-8')
+    def predict_file(self, image_path):
+        img = image_path.encode('utf-8')
         rst = []
         cb = PREDICT_RESULT_CALLBACK(
-            lambda p, n: id([rst.append(copy.deepcopy(p[n])) for n in range(n)]))
+            lambda p, n: [rst.append(copy.deepcopy(p[n])) for n in range(n)])
         self.c_predict_image_file(
             self.predictor, cast(img, c_char_p), cb)
-
         return rst
 
     def predict_image(self, data, width, height, channels):
         rst = []
         cb = PREDICT_RESULT_CALLBACK(
-            lambda p, n: id([rst.append(copy.deepcopy(p[n])) for n in range(n)]))
+            lambda p, n: [rst.append(copy.deepcopy(p[n])) for n in range(n)])
         self.predict_image(self.predictor, data,
                            width, height, channels, cb)
-
         return rst
