@@ -2,15 +2,15 @@ import os
 import sys
 import platform
 import copy
-from ctypes import *
+import ctypes
 
 
-class PredictResult(Structure):
-    _fields_ = [('class_id', c_int), ('x', c_float),
-                ('y', c_float), ('w', c_float), ('h', c_float), ('probability', c_float)]
+class PredictResult(ctypes.Structure):
+    _fields_ = [('class_id', ctypes.c_int), ('x', ctypes.c_float),
+                ('y', ctypes.c_float), ('w', ctypes.c_float), ('h', ctypes.c_float), ('probability', ctypes.c_float)]
 
 
-PREDICT_RESULT_CALLBACK = CFUNCTYPE(c_void_p, POINTER(PredictResult), c_int)
+PREDICT_RESULT_CALLBACK = ctypes.CFUNCTYPE(ctypes.c_void_p, ctypes.POINTER(PredictResult), ctypes.c_int)
 
 
 class DarkPredictor:
@@ -26,33 +26,33 @@ class DarkPredictor:
         lib_file = os.path.join(dir, lib_file)
 
         try:
-            lib = CDLL(lib_file)
+            lib = ctypes.CDLL(lib_file)
 
             create_predictor = lib.create_predictor
             create_predictor.argtypes = None
-            create_predictor.restype = c_void_p
+            create_predictor.restype = ctypes.c_void_p
 
             destroy_predictor = lib.destroy_predictor
-            destroy_predictor.argtypes = [c_void_p]
+            destroy_predictor.argtypes = [ctypes.c_void_p]
             destroy_predictor.restype = None
 
             set_log = lib.set_log
-            set_log.argtypes = [c_void_p, c_char_p]
+            set_log.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
             set_log.restype = None
 
             load = lib.load
-            load.argtypes = [c_void_p, c_char_p, c_char_p]
+            load.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
             load.restype = None
 
             predict_image = lib.predict_image
             predict_image.argtypes = [
-                c_void_p, c_char_p, c_int, c_int, c_int, PREDICT_RESULT_CALLBACK]
-            predict_image.restype = c_void_p
+                ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, PREDICT_RESULT_CALLBACK]
+            predict_image.restype = ctypes.c_void_p
 
             predict_image_file = lib.predict_image_file
             predict_image_file.argtypes = [
-                c_void_p, c_char_p, PREDICT_RESULT_CALLBACK]
-            predict_image_file.restype = c_void_p
+                ctypes.c_void_p, ctypes.c_char_p, PREDICT_RESULT_CALLBACK]
+            predict_image_file.restype = ctypes.c_void_p
 
             self.c_create_predictor = create_predictor
             self.c_destroy_predictor = destroy_predictor
@@ -72,13 +72,13 @@ class DarkPredictor:
 
     def set_log(self, log_file):
         lf = log_file.encode('utf-8')
-        self.c_set_log(self.predictor, cast(lf, c_char_p))
+        self.c_set_log(self.predictor, ctypes.cast(lf, ctypes.c_char_p))
 
     def load(self, cfg, weights):
         cs = cfg.encode('utf-8')
         wt = weights.encode('utf-8')
-        self.c_load(self.predictor, cast(
-            cs, c_char_p), cast(wt, c_char_p))
+        self.c_load(self.predictor, ctypes.cast(
+            cs, ctypes.c_char_p), ctypes.cast(wt, ctypes.c_char_p))
 
     def predict_file(self, image_path):
         img = image_path.encode('utf-8')
@@ -86,13 +86,13 @@ class DarkPredictor:
         cb = PREDICT_RESULT_CALLBACK(
             lambda p, n: [rst.append(copy.deepcopy(p[n])) for n in range(n)])
         self.c_predict_image_file(
-            self.predictor, cast(img, c_char_p), cb)
+            self.predictor, ctypes.cast(img, ctypes.c_char_p), cb)
         return rst
 
     def predict_image(self, data, width, height, channels):
         rst = []
         cb = PREDICT_RESULT_CALLBACK(
             lambda p, n: [rst.append(copy.deepcopy(p[n])) for n in range(n)])
-        self.predict_image(self.predictor, data,
+        self.c_predict_image(self.predictor, data,
                            width, height, channels, cb)
         return rst
